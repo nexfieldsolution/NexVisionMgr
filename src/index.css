@@ -452,3 +452,13 @@ body {
   box-shadow: 0 8px 24px rgba(0,0,0,0.6);
   color: #cccccc;
 }
+
+.activity-icon.running-run {
+  color: #ff4d4f !important;
+  cursor: pointer;
+}
+
+.activity-icon.running-run:hover {
+  color: #ff7875 !important;
+  background-color: rgba(255, 77, 79, 0.2) !important;
+}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <defs>
+    <linearGradient id="camGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff" />
+      <stop offset="100%" stop-color="#007acc" />
+    </linearGradient>
+  </defs>
+  <path d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" fill="url(#camGrad)" />
+  <circle cx="12" cy="14" r="4.5" fill="#ffffff" opacity="0.95" />
+  <circle cx="12" cy="14" r="2.5" fill="#005999" />
+</svg>

@@ -104,6 +104,24 @@
       <div class="activity-icon active" title="탐색기">&#9776;</div>
       <div id="run-btn" class="activity-icon disabled-run" onclick="runActivePythonFile()" title="파이썬 스크립트 실행 (▶)">
         &#9654;</div>
+
+      <!-- 비전 입력 소스 토글 그룹 -->
+      <div class="activity-source-group" style="position: relative;">
+        <div id="activity-source-toggle" class="activity-icon" onclick="event.stopPropagation(); toggleVisionSourceMenu()" title="비전 입력 소스 선택 (동영상 / 웹카메라)">
+          <img id="source-toggle-img" src="icon-video.svg" style="width: 24px; height: 24px; object-fit: contain;" />
+        </div>
+        <div id="source-sub-menu" class="source-sub-menu" style="display: none; position: absolute; left: 52px; top: 0; background: #252526; border: 1px solid #454545; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 2000; padding: 4px; min-width: 170px;">
+          <div id="src-opt-video" class="sub-activity-icon active" onclick="event.stopPropagation(); selectVisionSource('video')" title="샘플 동영상 파일 선택" style="padding: 8px 12px; font-size: 12px; color: #ffffff; cursor: pointer; display: flex; align-items: center; gap: 8px; border-radius: 3px;" onmouseover="this.style.background='#37373d'" onmouseout="this.style.background='transparent'">
+            <img src="icon-video.svg" style="width: 18px; height: 18px;" />
+            <span>🎥 동영상 파일 선택</span>
+          </div>
+          <div id="src-opt-cam" class="sub-activity-icon" onclick="event.stopPropagation(); selectVisionSource('camera')" title="웹카메라 디바이스 선택" style="padding: 8px 12px; font-size: 12px; color: #ffffff; cursor: pointer; display: flex; align-items: center; gap: 8px; border-radius: 3px;" onmouseover="this.style.background='#37373d'" onmouseout="this.style.background='transparent'">
+            <img src="icon-camera.svg" style="width: 18px; height: 18px;" />
+            <span>📷 웹카메라 선택</span>
+          </div>
+        </div>
+      </div>
+
       <div id="activity-vision-icon" class="activity-icon active" onclick="toggleVisionPanel()" title="비전 분석 라이브 패널 토글">
         👁️</div>
       <div class="activity-icon" title="검색">&#128080;</div>
@@ -161,13 +179,13 @@
       </div>
     </div>
 
-    <!-- 우측 최외곽 비전 결과 도킹 패널 (Far-Right Docked Panel) -->
-    <div id="vision-result-panel"
+    <!-- 우측 최외곽 제어 패널 (Control Panel) -->
+    <div id="control-panel"
       style="width: 360px; background: #252526; border-left: 1px solid #1e1e1e; display: flex; flex-direction: column; flex-shrink: 0; height: 100%;">
       <div
         style="height: 35px; background: #2d2d2d; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-bottom: 1px solid #1e1e1e;">
         <span style="font-size: 12px; font-weight: bold; color: #cccccc; display: flex; align-items: center; gap: 6px;">
-          👁️ 비전 분석 라이브 결과
+          🎛️ 제어 패널 (Control Panel)
         </span>
         <span onclick="toggleVisionPanel(false)" title="패널 닫기" style="cursor: pointer; color: #888; font-size: 12px;"
           onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">✕</span>
@@ -193,7 +211,30 @@
   <div id="explorer-context-menu" class="context-menu">
     <div class="menu-option" onclick="createNewFileFromExplorer()">📄 새 파일...</div>
     <div class="menu-separator"></div>
+    <div id="menu-opt-rename" class="menu-option" onclick="openRenameModal()">✏️ 파일 이름 변경... <span style="font-size: 10px; color: #888; margin-left: 8px;">F2</span></div>
+    <div id="menu-opt-copy" class="menu-option" onclick="copySelectedFile()">📋 파일 복사 <span style="font-size: 10px; color: #888; margin-left: 8px;">Ctrl+C</span></div>
+    <div id="menu-opt-paste" class="menu-option" onclick="pasteCopiedFile()">📋 파일 붙여넣기 <span style="font-size: 10px; color: #888; margin-left: 8px;">Ctrl+V</span></div>
+    <div id="menu-opt-delete" class="menu-option" onclick="deleteSelectedFile()" style="color: #ff4d4f;">🗑️ 파일 삭제</div>
+    <div id="menu-sep-paths" class="menu-separator"></div>
+    <div id="menu-opt-copy-fullpath" class="menu-option" onclick="copyFileFullPath()">🔗 전체 경로 복사</div>
+    <div id="menu-opt-copy-relpath" class="menu-option" onclick="copyFileRelativePath()">🔗 상대 경로 복사</div>
+    <div class="menu-separator"></div>
     <div class="menu-option" onclick="refreshProjectFiles()">🔄 새로고침</div>
+  </div>
+
+  <!-- 파일 이름 변경 커스텀 모달 -->
+  <div id="rename-file-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div style="font-size: 14px; font-weight: bold; margin-bottom: 12px; color: #ffffff; display: flex; align-items: center; gap: 6px;">
+        <span>✏️ 파일 이름 변경</span>
+      </div>
+      <div style="font-size: 12px; color: #888888; margin-bottom: 8px;">변경할 새로운 파일명을 입력하세요:</div>
+      <input type="text" id="rename-file-input" style="width: 100%; padding: 8px; font-size: 13px; background: #1e1e1e; color: #ffffff; border: 1px solid #007acc; border-radius: 4px; outline: none; margin-bottom: 16px;" onkeydown="if(event.key==='Enter') confirmRenameFile(); if(event.key==='Escape') closeRenameModal();" />
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button onclick="closeRenameModal()" style="padding: 6px 14px; font-size: 12px; background: #3c3c3c; color: #ffffff; border: none; border-radius: 4px; cursor: pointer;">취소</button>
+        <button onclick="confirmRenameFile()" style="padding: 6px 14px; font-size: 12px; background: #007acc; color: #ffffff; border: none; border-radius: 4px; cursor: pointer;">변경</button>
+      </div>
+    </div>
   </div>
 
   <!-- 탭 우클릭 컨텍스트 메뉴 -->
@@ -214,8 +255,222 @@
     let monacoEditor = null;
     let visionLiveInterval = null;
 
+    let contextTargetFilePath = null;
+    let contextTargetFileName = null;
+    let clipboardFilePath = null;
+    let clipboardFileName = null;
+
+    function copySelectedFile() {
+      hideExplorerContextMenu();
+      if (!contextTargetFilePath) return;
+      clipboardFilePath = contextTargetFilePath;
+      clipboardFileName = contextTargetFileName;
+      console.log(`[파일 복사] ${clipboardFilePath}`);
+    }
+
+    async function pasteCopiedFile() {
+      hideExplorerContextMenu();
+      if (!clipboardFilePath || !currentProjectPath) {
+        alert('복사된 파일이 없거나 프로젝트 폴더가 열려있지 않습니다.');
+        return;
+      }
+
+      const extIndex = clipboardFileName.lastIndexOf('.');
+      let baseName = clipboardFileName;
+      let ext = '';
+      if (extIndex !== -1) {
+        baseName = clipboardFileName.substring(0, extIndex);
+        ext = clipboardFileName.substring(extIndex);
+      }
+
+      let newFileName = `${baseName}(2)${ext}`;
+      let counter = 2;
+
+      const currentFiles = await window.electronAPI.readDir(currentProjectPath);
+      const existingNames = currentFiles ? currentFiles.map(f => f.name) : [];
+
+      while (existingNames.includes(newFileName)) {
+        counter++;
+        newFileName = `${baseName}(${counter})${ext}`;
+      }
+
+      const destPath = `${currentProjectPath}/${newFileName}`;
+
+      const res = await window.electronAPI.copyFileTo(clipboardFilePath, destPath);
+      if (res && res.success) {
+        await refreshProjectFiles();
+        openFile(destPath, newFileName);
+        console.log(`[파일 붙여넣기 성공] ${destPath}`);
+      } else {
+        alert(`파일 붙여넣기 실패: ${res ? res.error : '알 수 없는 오류'}`);
+      }
+    }
+
+    async function deleteSelectedFile() {
+      hideExplorerContextMenu();
+      if (!contextTargetFilePath) return;
+
+      const confirmDel = confirm(`정말로 '${contextTargetFileName}' 파일을 삭제하시겠습니까?`);
+      if (!confirmDel) return;
+
+      const res = await window.electronAPI.deleteFile(contextTargetFilePath);
+      if (res && res.success) {
+        closeTab(contextTargetFilePath);
+        await refreshProjectFiles();
+        console.log(`[파일 삭제 성공] ${contextTargetFilePath}`);
+      } else {
+        alert(`파일 삭제 실패: ${res ? res.error : '알 수 없는 오류'}`);
+      }
+    }
+
+    function copyFileFullPath() {
+      hideExplorerContextMenu();
+      if (!contextTargetFilePath) return;
+      navigator.clipboard.writeText(contextTargetFilePath);
+      console.log(`[전체 경로 복사 완료] ${contextTargetFilePath}`);
+    }
+
+    function copyFileRelativePath() {
+      hideExplorerContextMenu();
+      if (!contextTargetFilePath || !currentProjectPath) return;
+      let relPath = contextTargetFilePath;
+      if (relPath.startsWith(currentProjectPath)) {
+        relPath = relPath.substring(currentProjectPath.length);
+        if (relPath.startsWith('/')) relPath = relPath.substring(1);
+      }
+      navigator.clipboard.writeText(relPath);
+      console.log(`[상대 경로 복사 완료] ${relPath}`);
+    }
+
+    function openRenameModal() {
+      hideExplorerContextMenu();
+      if (!contextTargetFilePath) return;
+
+      const modal = document.getElementById('rename-file-modal');
+      const input = document.getElementById('rename-file-input');
+      if (input) input.value = contextTargetFileName || '';
+      if (modal) modal.style.display = 'flex';
+      setTimeout(() => {
+        if (input) {
+          input.focus();
+          const dotIdx = input.value.lastIndexOf('.');
+          if (dotIdx > 0) {
+            input.setSelectionRange(0, dotIdx);
+          } else {
+            input.select();
+          }
+        }
+      }, 50);
+    }
+
+    function closeRenameModal() {
+      const modal = document.getElementById('rename-file-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function confirmRenameFile() {
+      const input = document.getElementById('rename-file-input');
+      const newName = input ? input.value.trim() : '';
+      closeRenameModal();
+
+      if (!newName || !contextTargetFilePath || newName === contextTargetFileName) return;
+
+      const parentDir = contextTargetFilePath.substring(0, contextTargetFilePath.lastIndexOf('/'));
+      const newPath = `${parentDir}/${newName}`;
+
+      const res = await window.electronAPI.renameFile(contextTargetFilePath, newPath);
+      if (res && res.success) {
+        const targetTab = openTabs.find(t => t.path === contextTargetFilePath);
+        if (targetTab) {
+          targetTab.path = newPath;
+          targetTab.name = newName;
+          if (activeTabPath === contextTargetFilePath) {
+            activeTabPath = newPath;
+          }
+          renderTabs();
+        }
+        await refreshProjectFiles();
+        console.log(`[파일 이름 변경 성공] ${contextTargetFilePath} -> ${newPath}`);
+      } else {
+        alert(`파일 이름 변경 실패: ${res ? res.error : '알 수 없는 오류'}`);
+      }
+    }
+
+    let currentVisionSource = 'video';
+    let selectedVideoFilePath = null;
+    let selectedCameraDeviceId = '0';
+
+    function toggleVisionSourceMenu() {
+      const subMenu = document.getElementById('source-sub-menu');
+      if (subMenu) {
+        subMenu.style.display = subMenu.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+
+    async function selectVisionSource(sourceType) {
+      const subMenu = document.getElementById('source-sub-menu');
+      if (subMenu) subMenu.style.display = 'none';
+
+      if (isPythonRunning) {
+        await window.electronAPI.killPythonScript();
+        isPythonRunning = false;
+        if (visionLiveInterval) {
+          clearInterval(visionLiveInterval);
+          visionLiveInterval = null;
+        }
+        updateRunButtonState();
+      }
+
+      const toggleImg = document.getElementById('source-toggle-img');
+
+      if (sourceType === 'video') {
+        const videoPath = await window.electronAPI.selectVideoDialog();
+        if (videoPath) {
+          selectedVideoFilePath = videoPath;
+          currentVisionSource = 'video';
+          if (toggleImg) toggleImg.src = 'icon-video.svg';
+          console.log(`[비전 소스 선택 완료] 동영상: ${videoPath}`);
+        }
+      } else if (sourceType === 'camera') {
+        const cameras = await window.electronAPI.detectCameras();
+        if (cameras && cameras.length > 0) {
+          selectedCameraDeviceId = cameras[0].id;
+          currentVisionSource = 'camera';
+          if (toggleImg) toggleImg.src = 'icon-camera.svg';
+          alert(`📷 웹카메라 연결 완료: ${cameras[0].label}`);
+        }
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       refreshProjectFiles();
+
+      if (window.electronAPI && window.electronAPI.onPythonOutput) {
+        window.electronAPI.onPythonOutput((payload) => {
+          const outputDiv = document.getElementById('terminal-output');
+          if (outputDiv && payload.data) {
+            outputDiv.textContent += payload.data;
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+          }
+        });
+      }
+
+      if (window.electronAPI && window.electronAPI.onPythonExit) {
+        window.electronAPI.onPythonExit((payload) => {
+          isPythonRunning = false;
+          if (visionLiveInterval) {
+            clearInterval(visionLiveInterval);
+            visionLiveInterval = null;
+          }
+          updateRunButtonState();
+          const visionStatusBar = document.getElementById('vision-status-bar');
+          const activeTab = openTabs.find(t => t.path === activeTabPath);
+          if (visionStatusBar) {
+            visionStatusBar.textContent = `✅ 비전 분석 완료 (코드: ${payload.code}) ${activeTab ? activeTab.name : ''}`;
+          }
+          refreshProjectFiles();
+        });
+      }
     });
 
     if (window.require) {
@@ -306,6 +561,13 @@
             if (!file.isDirectory) {
               openFile(file.path, file.name);
             }
+          };
+          li.oncontextmenu = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            contextTargetFilePath = file.path;
+            contextTargetFileName = file.name;
+            showExplorerContextMenu(e.clientX, e.clientY, true);
           };
           fileListUl.appendChild(li);
         });
@@ -454,20 +716,43 @@
       }
     }
 
+    let isPythonRunning = false;
+
     function updateRunButtonState() {
       const runBtn = document.getElementById('run-btn');
       const activeTab = openTabs.find(t => t.path === activeTabPath);
 
-      if (activeTab && activeTab.name.toLowerCase().endsWith('.py')) {
+      if (isPythonRunning) {
+        runBtn.className = 'activity-icon running-run';
+        runBtn.textContent = '⏹';
+        runBtn.title = '⏹ 파이썬 스크립트 중지';
+      } else if (activeTab && activeTab.name.toLowerCase().endsWith('.py')) {
         runBtn.className = 'activity-icon active-run';
+        runBtn.textContent = '▶';
         runBtn.title = `▶ Python 스크립트 실행 (${activeTab.name})`;
       } else {
         runBtn.className = 'activity-icon disabled-run';
+        runBtn.textContent = '▶';
         runBtn.title = '실행할 파이썬 파일(.py)을 열어주세요';
       }
     }
 
     async function runActivePythonFile() {
+      if (isPythonRunning) {
+        await window.electronAPI.killPythonScript();
+        isPythonRunning = false;
+        if (visionLiveInterval) {
+          clearInterval(visionLiveInterval);
+          visionLiveInterval = null;
+        }
+        const visionStatusBar = document.getElementById('vision-status-bar');
+        if (visionStatusBar) visionStatusBar.textContent = `🛑 비전 분석 중지됨`;
+        const outputDiv = document.getElementById('terminal-output');
+        if (outputDiv) outputDiv.textContent += '\n🛑 [사용자 요청] 파이썬 스크립트 실행이 중지되었습니다.\n';
+        updateRunButtonState();
+        return;
+      }
+
       const activeTab = openTabs.find(t => t.path === activeTabPath);
       if (!activeTab || !activeTab.name.toLowerCase().endsWith('.py')) {
         return;
@@ -476,6 +761,9 @@
       if (activeTab.isModified) {
         await saveCurrentFile();
       }
+
+      isPythonRunning = true;
+      updateRunButtonState();
 
       toggleTerminalMenu(true);
       const outputDiv = document.getElementById('terminal-output');
@@ -494,34 +782,35 @@
       if (visionImg) visionImg.style.display = 'block';
       if (visionStatusBar) visionStatusBar.textContent = `⚡ 비전 스트리밍 실시간 라이브 분석 중...`;
 
+      const scriptDir = activeTab.path.substring(0, activeTab.path.lastIndexOf('/'));
+      const targetPreviewDir = scriptDir || currentProjectPath;
+
       if (visionLiveInterval) clearInterval(visionLiveInterval);
       visionLiveInterval = setInterval(() => {
-        if (currentProjectPath && visionImg) {
-          visionImg.src = 'file://' + currentProjectPath + '/preview.jpg?' + Date.now();
+        if (targetPreviewDir && visionImg) {
+          const imgUrl = 'file://' + targetPreviewDir + '/preview.jpg?' + Date.now();
+          const tempImg = new Image();
+          tempImg.onload = () => {
+            // 완전하게 렌더링 가능한 크기가 확인된 깨끗한 이미지 프레임만 적용
+            if (visionImg && tempImg.naturalWidth > 0 && tempImg.naturalHeight > 0) {
+              visionImg.src = imgUrl;
+            }
+          };
+          tempImg.onerror = () => {
+            // 손상된 덜 쓰여진 파일은 무시하여 기존의 마지막 깨끗한 프레임 유지
+          };
+          tempImg.src = imgUrl;
         }
-      }, 80);
+      }, 50);
 
-      const res = await window.electronAPI.runPythonScript(activeTab.path);
-
-      if (visionLiveInterval) {
-        clearInterval(visionLiveInterval);
-        visionLiveInterval = null;
+      let sourceArgs = [];
+      if (currentVisionSource === 'video' && selectedVideoFilePath) {
+        sourceArgs = ['--source-type', 'video', '--source-value', selectedVideoFilePath];
+      } else if (currentVisionSource === 'camera') {
+        sourceArgs = ['--source-type', 'camera', '--source-value', selectedCameraDeviceId || '0'];
       }
 
-      if (res.stdout) {
-        outputDiv.textContent += res.stdout;
-      }
-      if (res.stderr) {
-        outputDiv.textContent += (outputDiv.textContent && !outputDiv.textContent.endsWith('\n') ? '\n' : '') + res.stderr;
-      }
-      outputDiv.scrollTop = outputDiv.scrollHeight;
-
-      refreshProjectFiles();
-
-      if (currentProjectPath && visionImg && visionStatusBar) {
-        visionImg.src = 'file://' + currentProjectPath + '/preview.jpg?' + Date.now();
-        visionStatusBar.textContent = `✅ 비전 분석 실시간 완료: ${activeTab.name}`;
-      }
+      await window.electronAPI.runPythonScript(activeTab.path, sourceArgs);
     }
 
     async function saveCurrentFile() {
@@ -564,7 +853,7 @@
     }
 
     function toggleVisionPanel(show) {
-      const panel = document.getElementById('vision-result-panel');
+      const panel = document.getElementById('control-panel');
       const icon = document.getElementById('activity-vision-icon');
       if (show !== undefined) {
         panel.style.display = show ? 'flex' : 'none';
@@ -614,10 +903,61 @@
     document.addEventListener('click', () => {
       hideExplorerContextMenu();
       hideTabContextMenu();
+      const subMenu = document.getElementById('source-sub-menu');
+      if (subMenu) subMenu.style.display = 'none';
     });
 
-    function showExplorerContextMenu(x, y) {
+    document.addEventListener('keydown', (e) => {
+      const activeEl = document.activeElement;
+      const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.classList.contains('inputarea'));
+
+      if (!isInput) {
+        if (e.key === 'F2' && contextTargetFilePath) {
+          e.preventDefault();
+          openRenameModal();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c' && contextTargetFilePath) {
+          copySelectedFile();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v' && clipboardFilePath) {
+          pasteCopiedFile();
+        } else if (e.key === 'Delete' && contextTargetFilePath) {
+          deleteSelectedFile();
+        }
+      }
+    });
+
+    function showExplorerContextMenu(x, y, isFileSelected = false) {
       const menu = document.getElementById('explorer-context-menu');
+      const optRename = document.getElementById('menu-opt-rename');
+      const optCopy = document.getElementById('menu-opt-copy');
+      const optDelete = document.getElementById('menu-opt-delete');
+      const optPaste = document.getElementById('menu-opt-paste');
+      const optFullPath = document.getElementById('menu-opt-copy-fullpath');
+      const optRelPath = document.getElementById('menu-opt-copy-relpath');
+      const sepPaths = document.getElementById('menu-sep-paths');
+
+      if (isFileSelected) {
+        if (optRename) optRename.style.display = 'block';
+        if (optCopy) optCopy.style.display = 'block';
+        if (optDelete) optDelete.style.display = 'block';
+        if (optFullPath) optFullPath.style.display = 'block';
+        if (optRelPath) optRelPath.style.display = 'block';
+        if (sepPaths) sepPaths.style.display = 'block';
+      } else {
+        if (optRename) optRename.style.display = 'none';
+        if (optCopy) optCopy.style.display = 'none';
+        if (optDelete) optDelete.style.display = 'none';
+        if (optFullPath) optFullPath.style.display = 'none';
+        if (optRelPath) optRelPath.style.display = 'none';
+        if (sepPaths) sepPaths.style.display = 'none';
+        contextTargetFilePath = null;
+        contextTargetFileName = null;
+      }
+
+      if (optPaste) {
+        optPaste.style.opacity = clipboardFilePath ? '1' : '0.4';
+        optPaste.style.pointerEvents = clipboardFilePath ? 'auto' : 'none';
+      }
+
       menu.style.left = `${x}px`;
       menu.style.top = `${y}px`;
       menu.style.display = 'block';
@@ -715,6 +1055,23 @@
         renderTabs();
         renderActiveTabContent();
       }
+    }
+
+    if (window.electronAPI && window.electronAPI.onPythonExit) {
+      window.electronAPI.onPythonExit(({ code }) => {
+        isPythonRunning = false;
+        updateRunButtonState();
+        if (visionLiveInterval) {
+          clearInterval(visionLiveInterval);
+          visionLiveInterval = null;
+        }
+        const visionStatusBar = document.getElementById('vision-status-bar');
+        const activeTab = openTabs.find(t => t.path === activeTabPath);
+        const fileName = activeTab ? activeTab.name : '비전 스크립트';
+        if (visionStatusBar) {
+          visionStatusBar.textContent = `⏸ 분석 완료/정지: ${fileName} (마지막 프레임 유지)`;
+        }
+      });
     }
   </script>
 </body>
