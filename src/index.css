@@ -1,0 +1,170 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #1e1e1e;
+  color: #cccccc;
+  overflow: hidden;
+}
+
+/* 커스텀 타이틀바 */
+.title-bar {
+  height: 30px;
+  background: #333333;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  -webkit-app-region: drag;
+  flex-shrink: 0;
+}
+
+.title-bar-text {
+  font-size: 12px;
+  color: #cccccc;
+  -webkit-app-region: no-drag;
+}
+
+.window-controls {
+  display: flex;
+  margin-left: auto;
+  -webkit-app-region: no-drag;
+}
+
+.win-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: #cccccc;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.win-btn:hover {
+  background: #505050;
+}
+
+.win-btn.close:hover {
+  background: #4143e0;
+  border-radius: 50%;
+  color: #ffffff;
+}
+
+/* activity-bar + projectbar + main 감싸는 영역 */
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* 가장 왼쪽 아이콘 바 */
+.activity-bar {
+  width: 48px;
+  background: #333333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  color: #858585;
+  border-left: 2px solid transparent;
+}
+
+.activity-icon:hover {
+  color: #cccccc;
+}
+
+.activity-icon.active {
+  color: #ffffff;
+  border-left: 2px solid #007acc;
+}
+
+/* 사이드바 */
+.projectbar {
+  width: 220px;
+  background: #252526;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  border-right: 1px solid #1e1e1e;
+}
+
+.projectbar-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #bbbbbb;
+  padding: 12px 16px 8px;
+}
+
+.file-list {
+  list-style: none;
+  font-size: 13px;
+}
+
+.file-list li {
+  padding: 4px 16px 4px 24px;
+  cursor: pointer;
+  color: #cccccc;
+}
+
+.file-list li:hover {
+  background: #2a2d2e;
+}
+
+/* 메인 에디터 영역 */
+.main {
+  flex: 1;
+  padding: 16px;
+  overflow: auto;
+}
+
+.main-title {
+  font-size: 13px;
+  color: #cccccc;
+  padding: 6px 0 12px;
+  border-bottom: 1px solid #3c3c3c;
+  margin-bottom: 16px;
+}
+
+.file-content {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #d4d4d4;
+  white-space: pre;
+  line-height: 1.6;
+}
+
+.main h1 {
+  font-size: 24px;
+  font-weight: 400;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+.main p {
+  font-size: 14px;
+  color: #888888;
+}

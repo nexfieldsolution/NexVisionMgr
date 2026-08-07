@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>NexVisionMgr</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <div class="title-bar">
+      <span class="title-bar-text">NexVisionMgr</span>
+      <div class="window-controls">
+        <button class="win-btn minimize" title="최소화" onclick="window.electronAPI.minimizeWindow()">&#8722;</button>
+        <button class="win-btn maximize" title="최대화" onclick="window.electronAPI.maximizeWindow()" >&#9744;</button>
+        <button class="win-btn close" title="닫기" onclick="window.electronAPI.closeWindow()">&#10005;</button>
+      </div>
+    </div>
+
+    <div class="workspace">
+    <div class="activity-bar">
+      <div class="activity-icon active" title="탐색기">&#9776;</div>
+      <div class="activity-icon" title="검색">&#128269;</div>
+      <div class="activity-icon" title="설정">&#9881;</div>
+    </div>
+
+    <div class="projectbar">
+      <div class="projectbar-title">탐색기</div>
+      <ul class="file-list">
+        <li onclick="openFile('index.html')">index.html</li>
+        <li onclick="openFile('index.css')">index.css</li>
+        <li onclick="openFile('index.js')">index.js</li>
+        <li onclick="openFile('preload.js')">preload.js</li>
+      </ul>
+    </div>
+
+    <div class="main">
+      <div class="main-title" id="main-title">파일을 선택하세요.</div>
+      <pre id="file-content" class="file-content"></pre>
+    </div>
+    </div>
+  <script>
+    window.electronAPI.onWindowState((isMaximized) => {
+      document.querySelector('.win-btn.maximize').innerHTML = isMaximized ? '&#10697;' : '&#9744;';
+    });
+
+    async function openFile(filename) {
+      const content = await window.electronAPI.readFile(filename);
+      document.getElementById('main-title').textContent = filename;
+      document.getElementById('file-content').textContent = content;
+    }
+  </script>
+  </body>
+</html>
