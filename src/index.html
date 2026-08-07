@@ -1,52 +1,722 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>NexVisionMgr</title>
-    <link rel="stylesheet" href="index.css" />
-  </head>
-  <body>
-    <div class="title-bar">
-      <span class="title-bar-text">NexVisionMgr</span>
-      <div class="window-controls">
-        <button class="win-btn minimize" title="최소화" onclick="window.electronAPI.minimizeWindow()">&#8722;</button>
-        <button class="win-btn maximize" title="최대화" onclick="window.electronAPI.maximizeWindow()" >&#9744;</button>
-        <button class="win-btn close" title="닫기" onclick="window.electronAPI.closeWindow()">&#10005;</button>
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>넥스 비전 관리자 (NexVisionMgr)</title>
+  <link rel="stylesheet" href="index.css">
+  <script src="../node_modules/monaco-editor/min/vs/loader.js"></script>
+</head>
+
+<body>
+  <!-- 커스텀 타이틀바 -->
+  <div class="titlebar">
+    <div class="titlebar-drag-region">
+      <img src="logo.png" class="app-icon" alt="NexVisionMgr Logo">
+      <div class="app-name">넥스 비전 관리자</div>
+      <div class="menubar">
+        <div class="menu-item">
+          File
+          <div class="dropdown-content">
+            <div class="menu-option" onclick="openNewProjectModal()">✨ 새 프로젝트...</div>
+            <div class="menu-option" onclick="createNewFileFromExplorer()">📄 새 파일...</div>
+            <div class="menu-separator"></div>
+            <div class="menu-option" onclick="openProject()">📂 프로젝트 폴더 열기...</div>
+            <div class="menu-option" onclick="saveCurrentFile()">💾 파일 저장 <span class="shortcut">Ctrl+S</span></div>
+            <div class="menu-separator"></div>
+            <div class="menu-option" onclick="window.electronAPI.closeWindow()">🚪 종료</div>
+          </div>
+        </div>
+        <div class="menu-item">
+          Edit
+          <div class="dropdown-content">
+            <div class="menu-option" onclick="triggerEditorAction('undo')">↩ 실행 취소 <span class="shortcut">Ctrl+Z</span>
+            </div>
+            <div class="menu-option" onclick="triggerEditorAction('redo')">↪ 다시 실행 <span class="shortcut">Ctrl+Y</span>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-option" onclick="triggerEditorAction('comment')">💬 주석 토글 <span
+                class="shortcut">Ctrl+/</span></div>
+          </div>
+        </div>
+        <div class="menu-item">
+          View
+          <div class="dropdown-content">
+            <div class="menu-option" onclick="toggleTerminalMenu()">💻 콘솔 터미널 <span class="shortcut">Ctrl+`</span></div>
+            <div class="menu-option" onclick="toggleVisionPanel()">👁️ 비전 분석 패널</div>
+          </div>
+        </div>
+        <div class="menu-item">
+          Run
+          <div class="dropdown-content">
+            <div class="menu-option" onclick="runActivePythonFile()">▶ Python 스크립트 실행 <span class="shortcut">F5</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="workspace">
+    <div class="window-controls">
+      <div class="control-btn minimize-btn" onclick="window.electronAPI.minimizeWindow()" title="최소화">&#8211;</div>
+      <div class="control-btn maximize-btn" onclick="window.electronAPI.maximizeWindow()" title="최대화">&#9633;</div>
+      <div class="control-btn close-btn" onclick="window.electronAPI.closeWindow()" title="닫기">&#10005;</div>
+    </div>
+  </div>
+
+  <!-- 새 프로젝트 생성 모달 -->
+  <div id="new-project-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <h3 style="font-size: 14px; font-weight: 600; color: #ffffff; margin-bottom: 8px;">✨ 새 프로젝트 생성</h3>
+      <p style="margin-bottom: 12px; font-size: 12px; color: #aaaaaa;">생성할 프로젝트 폴더 이름을 입력하세요:</p>
+      <input type="text" id="project-name-input" value="VisionProject1"
+        style="width: 100%; padding: 8px; font-size: 13px; background: #1e1e1e; color: #ffffff; border: 1px solid #454545; border-radius: 4px; margin-bottom: 16px; outline: none;">
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button onclick="closeNewProjectModal()"
+          style="padding: 6px 14px; font-size: 12px; background: #3c3c3c; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">취소</button>
+        <button onclick="confirmNewProject()"
+          style="padding: 6px 14px; font-size: 12px; background: #007acc; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">위치
+          선택 및 생성</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 새 파일 생성 모달 -->
+  <div id="new-file-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <h3 style="font-size: 14px; font-weight: 600; color: #ffffff; margin-bottom: 8px;">📄 새 파일 생성</h3>
+      <p style="margin-bottom: 12px; font-size: 12px; color: #aaaaaa;">생성할 파일 이름을 입력하세요:</p>
+      <input type="text" id="new-file-name-input" value="sample.py"
+        onkeydown="if(event.key==='Enter') confirmCreateNewFile()"
+        style="width: 100%; padding: 8px; font-size: 13px; background: #1e1e1e; color: #ffffff; border: 1px solid #007acc; border-radius: 4px; margin-bottom: 16px; outline: none; box-sizing: border-box;">
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button onclick="closeNewFileModal()"
+          style="padding: 6px 14px; font-size: 12px; background: #3c3c3c; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">취소</button>
+        <button onclick="confirmCreateNewFile()"
+          style="padding: 6px 14px; font-size: 12px; background: #007acc; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">생성</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <!-- 사이드 액티비티 바 -->
     <div class="activity-bar">
       <div class="activity-icon active" title="탐색기">&#9776;</div>
-      <div class="activity-icon" title="검색">&#128269;</div>
-      <div class="activity-icon" title="설정">&#9881;</div>
+      <div id="run-btn" class="activity-icon disabled-run" onclick="runActivePythonFile()" title="파이썬 스크립트 실행 (▶)">
+        &#9654;</div>
+      <div id="activity-vision-icon" class="activity-icon active" onclick="toggleVisionPanel()" title="비전 분석 라이브 패널 토글">
+        👁️</div>
+      <div class="activity-icon" title="검색">&#128080;</div>
+      <div class="activity-icon" style="margin-top: auto;" title="설정">&#9881;</div>
     </div>
 
-    <div class="projectbar">
-      <div class="projectbar-title">탐색기</div>
-      <ul class="file-list">
-        <li onclick="openFile('index.html')">index.html</li>
-        <li onclick="openFile('index.css')">index.css</li>
-        <li onclick="openFile('index.js')">index.js</li>
-        <li onclick="openFile('preload.js')">preload.js</li>
-      </ul>
+    <!-- 탐색기 패널 -->
+    <div id="explorer-panel" class="explorer-panel">
+      <div class="explorer-title">
+        <span>탐색기</span>
+        <span class="refresh-icon" onclick="refreshProjectFiles()" title="새로고침">&#8635;</span>
+      </div>
+      <div class="project-folder-header">
+        <span class="folder-icon">&#128193;</span>
+        <span id="current-folder-name" class="folder-name">MyVisionProject</span>
+      </div>
+      <div class="explorer-content">
+        <ul id="file-list-tree" class="file-tree"></ul>
+      </div>
     </div>
 
-    <div class="main">
-      <div class="main-title" id="main-title">파일을 선택하세요.</div>
-      <pre id="file-content" class="file-content"></pre>
+    <!-- 중앙 에디터 & 미디어 영역 -->
+    <div class="editor-area">
+      <div id="editor-tabs-bar" class="editor-tabs"></div>
+
+      <div class="editor-main-container" style="flex: 1; position: relative; display: flex; flex-direction: column;">
+        <div id="no-file-notice" class="no-file-notice">
+          <!-- <h2>NexVisionMgr IDE</h2> -->
+          <p>프로젝트 폴더를 열거나 좌측 상단 <b>File ➔ 새 프로젝트</b>를 선택하세요.</p>
+        </div>
+
+        <div id="monaco-editor-container" style="display: none; width: 100%; height: 100%;"></div>
+
+        <!-- 이미지 & 동영상 미디어 뷰어 -->
+        <div id="image-viewer"
+          style="display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; background: #181818; padding: 20px; overflow: auto;">
+          <img id="viewer-img" src=""
+            style="display: none; max-width: 90%; max-height: 85%; border: 1px solid #333333; box-shadow: 0 8px 24px rgba(0,0,0,0.6); object-fit: contain;" />
+          <video id="viewer-video" controls autoplay loop muted
+            style="display: none; max-width: 90%; max-height: 85%; border: 1px solid #333333; box-shadow: 0 8px 24px rgba(0,0,0,0.6); outline: none;"></video>
+          <div id="image-info" style="margin-top: 12px; font-size: 12px; color: #888888;"></div>
+        </div>
+      </div>
+
+      <!-- 하단 터미널 / 콘솔 패널 -->
+      <div id="terminal-panel" class="terminal-panel">
+        <div class="terminal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="terminal-title">💻 터미널 / 파이썬 콘솔</span>
+            <span class="terminal-action-btn" onclick="clearTerminalOutput()" title="콘솔 지우기">🗑</span>
+          </div>
+          <span class="terminal-close" onclick="toggleTerminalMenu(false)" title="터미널 닫기">✕</span>
+        </div>
+        <div id="terminal-output" class="terminal-output"></div>
+      </div>
     </div>
+
+    <!-- 우측 최외곽 비전 결과 도킹 패널 (Far-Right Docked Panel) -->
+    <div id="vision-result-panel"
+      style="width: 360px; background: #252526; border-left: 1px solid #1e1e1e; display: flex; flex-direction: column; flex-shrink: 0; height: 100%;">
+      <div
+        style="height: 35px; background: #2d2d2d; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-bottom: 1px solid #1e1e1e;">
+        <span style="font-size: 12px; font-weight: bold; color: #cccccc; display: flex; align-items: center; gap: 6px;">
+          👁️ 비전 분석 라이브 결과
+        </span>
+        <span onclick="toggleVisionPanel(false)" title="패널 닫기" style="cursor: pointer; color: #888; font-size: 12px;"
+          onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">✕</span>
+      </div>
+      <div
+        style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; background: #181818; overflow: auto;">
+        <div id="vision-no-result" style="color: #666; font-size: 12px; text-align: center;">
+          파이썬 비전 스크립트를 실행(▶)하면<br>실행 결과 이미지/영상이 여기에 자동 출력됩니다.
+        </div>
+        <img id="vision-result-img" src=""
+          style="display: none; max-width: 100%; max-height: 100%; border: 1px solid #3c3c3c; box-shadow: 0 6px 18px rgba(0,0,0,0.5); object-fit: contain;" />
+        <video id="vision-result-video" controls autoplay loop muted
+          style="display: none; max-width: 100%; max-height: 100%; border: 1px solid #3c3c3c; box-shadow: 0 6px 18px rgba(0,0,0,0.5); outline: none;"></video>
+      </div>
+      <div id="vision-status-bar"
+        style="padding: 8px 12px; font-size: 11px; color: #007acc; background: #252526; border-top: 1px solid #1e1e1e; font-weight: bold;">
+        상태: 대기 중
+      </div>
     </div>
+  </div>
+
+  <!-- 탐색기 우클릭 컨텍스트 메뉴 -->
+  <div id="explorer-context-menu" class="context-menu">
+    <div class="menu-option" onclick="createNewFileFromExplorer()">📄 새 파일...</div>
+    <div class="menu-separator"></div>
+    <div class="menu-option" onclick="refreshProjectFiles()">🔄 새로고침</div>
+  </div>
+
+  <!-- 탭 우클릭 컨텍스트 메뉴 -->
+  <div id="tab-context-menu" class="context-menu">
+    <div class="menu-option" onclick="handleTabContextMenu('copy-path')">📋 전체 경로 복사</div>
+    <div class="menu-option" onclick="handleTabContextMenu('copy-relative-path')">📄 상대 경로 복사</div>
+    <div class="menu-separator"></div>
+    <div class="menu-option" onclick="handleTabContextMenu('close')">✕ 탭 닫기</div>
+    <div class="menu-option" onclick="handleTabContextMenu('close-others')">✕ 다른 탭 닫기</div>
+    <div class="menu-option" onclick="handleTabContextMenu('close-all')">✕ 모든 탭 닫기</div>
+  </div>
+
   <script>
-    window.electronAPI.onWindowState((isMaximized) => {
-      document.querySelector('.win-btn.maximize').innerHTML = isMaximized ? '&#10697;' : '&#9744;';
+    let currentProjectPath = null;
+    let openTabs = [];
+    let activeTabPath = null;
+    let contextTargetTabPath = null;
+    let monacoEditor = null;
+    let visionLiveInterval = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      refreshProjectFiles();
     });
 
-    async function openFile(filename) {
-      const content = await window.electronAPI.readFile(filename);
-      document.getElementById('main-title').textContent = filename;
-      document.getElementById('file-content').textContent = content;
+    if (window.require) {
+      require.config({ paths: { 'vs': '../node_modules/monaco-editor/min/vs' } });
+      require(['vs/editor/editor.main'], function () {
+        monacoEditor = monaco.editor.create(document.getElementById('monaco-editor-container'), {
+          value: '',
+          language: 'python',
+          theme: 'vs-dark',
+          automaticLayout: true,
+          fontSize: 14,
+          fontFamily: "'Consolas', 'Fira Code', 'Courier New', monospace",
+          minimap: { enabled: true },
+          scrollBeyondLastLine: false,
+          tabSize: 4,
+          renderLineHighlight: 'all',
+          lineNumbers: 'on',
+          cursorBlinking: 'smooth',
+          smoothScrolling: true
+        });
+
+        monacoEditor.onDidChangeModelContent(() => {
+          const activeTab = openTabs.find(t => t.path === activeTabPath);
+          if (activeTab && !activeTab.isImage && !activeTab.isVideo) {
+            const currentVal = monacoEditor.getValue();
+            if (activeTab.content !== currentVal) {
+              activeTab.content = currentVal;
+              activeTab.isModified = true;
+              renderTabs();
+            }
+          }
+        });
+      });
+    }
+
+    async function openProject() {
+      const projectPath = await window.electronAPI.openProjectDialog();
+      if (projectPath) {
+        currentProjectPath = projectPath;
+        openTabs = [];
+        activeTabPath = null;
+        renderTabs();
+        renderActiveTabContent();
+        await refreshProjectFiles();
+      }
+    }
+
+    async function refreshProjectFiles() {
+      const folderNameSpan = document.getElementById('current-folder-name');
+      const fileListUl = document.getElementById('file-list-tree');
+
+      if (!currentProjectPath) {
+        if (folderNameSpan) folderNameSpan.textContent = '';
+        if (fileListUl) {
+          fileListUl.innerHTML = `
+            <div style="padding: 16px 12px; text-align: center;">
+              <p style="font-size: 12px; color: #888; margin-bottom: 12px;">폴더를 열거나 새 프로젝트를 생성하세요.</p>
+              <button onclick="openProject()" style="width: 100%; padding: 8px; font-size: 12px; background: #007acc; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 8px;">📂 프로젝트 폴더 열기</button>
+              <button onclick="openNewProjectModal()" style="width: 100%; padding: 8px; font-size: 12px; background: #3c3c3c; color: #fff; border: 1px solid #555; border-radius: 4px; cursor: pointer;">✨ 새 프로젝트...</button>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      const parts = currentProjectPath.split('/');
+      if (folderNameSpan) folderNameSpan.textContent = parts[parts.length - 1] || currentProjectPath;
+
+      try {
+        const files = await window.electronAPI.readDir(currentProjectPath);
+        if (fileListUl) fileListUl.innerHTML = '';
+
+        files.forEach(file => {
+          const li = document.createElement('li');
+          let icon = file.isDirectory ? '📁 ' : '📄 ';
+          if (!file.isDirectory) {
+            if (/\.(jpg|jpeg|png|bmp|webp)$/i.test(file.name)) {
+              icon = '🖼️ ';
+            } else if (/\.(mp4|webm|ogv)$/i.test(file.name)) {
+              icon = '🎥 ';
+            } else if (file.name.endsWith('.py')) {
+              icon = '🐍 ';
+            }
+          }
+
+          li.textContent = icon + file.name;
+          li.onclick = () => {
+            if (!file.isDirectory) {
+              openFile(file.path, file.name);
+            }
+          };
+          fileListUl.appendChild(li);
+        });
+      } catch (err) {
+        console.error('refreshProjectFiles error:', err);
+      }
+    }
+
+    async function openFile(filePath, fileName) {
+      const isImage = /\.(jpg|jpeg|png|bmp|webp)$/i.test(fileName);
+      const isVideo = /\.(mp4|webm|ogv)$/i.test(fileName);
+      let content = '';
+
+      if (!isImage && !isVideo) {
+        content = await window.electronAPI.readFile(filePath);
+      }
+
+      const existingTab = openTabs.find(t => t.path === filePath);
+      if (!existingTab) {
+        openTabs.push({
+          path: filePath,
+          name: fileName,
+          content: content,
+          isModified: false,
+          isImage: isImage,
+          isVideo: isVideo
+        });
+      }
+      activeTabPath = filePath;
+      renderTabs();
+      renderActiveTabContent();
+    }
+
+    function renderTabs() {
+      const tabsBar = document.getElementById('editor-tabs-bar');
+      tabsBar.innerHTML = '';
+
+      openTabs.forEach(tab => {
+        const tabEl = document.createElement('div');
+        tabEl.className = `tab ${tab.path === activeTabPath ? 'active' : ''}`;
+
+        let icon = '📄 ';
+        if (tab.isImage) icon = '🖼️ ';
+        else if (tab.isVideo) icon = '🎥 ';
+        else if (tab.name.endsWith('.py')) icon = '🐍 ';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = icon + tab.name + (tab.isModified ? ' ●' : '');
+        tabEl.appendChild(titleSpan);
+
+        const closeBtn = document.createElement('span');
+        closeBtn.className = 'close-tab';
+        closeBtn.textContent = '✕';
+        closeBtn.onclick = (e) => {
+          e.stopPropagation();
+          closeTab(tab.path);
+        };
+        tabEl.appendChild(closeBtn);
+
+        tabEl.onclick = () => switchTab(tab.path);
+
+        tabEl.oncontextmenu = (e) => {
+          e.preventDefault();
+          showTabContextMenu(e.clientX, e.clientY, tab.path);
+        };
+
+        tabsBar.appendChild(tabEl);
+      });
+    }
+
+    function switchTab(filePath) {
+      activeTabPath = filePath;
+      renderTabs();
+      renderActiveTabContent();
+    }
+
+    function closeTab(filePath) {
+      openTabs = openTabs.filter(t => t.path !== filePath);
+      if (activeTabPath === filePath) {
+        activeTabPath = openTabs.length > 0 ? openTabs[openTabs.length - 1].path : null;
+      }
+      renderTabs();
+      renderActiveTabContent();
+    }
+
+    function renderActiveTabContent() {
+      const activeTab = openTabs.find(t => t.path === activeTabPath);
+      const noFileNotice = document.getElementById('no-file-notice');
+      const editorContainer = document.getElementById('monaco-editor-container');
+      const imageViewer = document.getElementById('image-viewer');
+      const viewerImg = document.getElementById('viewer-img');
+      const viewerVideo = document.getElementById('viewer-video');
+      const imageInfo = document.getElementById('image-info');
+
+      if (activeTab) {
+        noFileNotice.style.display = 'none';
+        if (activeTab.isImage) {
+          editorContainer.style.display = 'none';
+          imageViewer.style.display = 'flex';
+          if (viewerVideo) viewerVideo.style.display = 'none';
+          viewerImg.style.display = 'block';
+          viewerImg.src = 'file://' + activeTab.path + '?' + Date.now();
+          imageInfo.textContent = `📷 이미지: ${activeTab.name}`;
+        } else if (activeTab.isVideo) {
+          editorContainer.style.display = 'none';
+          imageViewer.style.display = 'flex';
+          viewerImg.style.display = 'none';
+          viewerVideo.style.display = 'block';
+          viewerVideo.src = 'file://' + activeTab.path;
+          imageInfo.textContent = `🎥 비디오 재생 중: ${activeTab.name}`;
+        } else {
+          imageViewer.style.display = 'none';
+          if (viewerVideo) viewerVideo.pause();
+          editorContainer.style.display = 'block';
+          if (monacoEditor) {
+            const lang = getLanguageByFileName(activeTab.name);
+            const model = monacoEditor.getModel();
+            if (model) {
+              monaco.editor.setModelLanguage(model, lang);
+            }
+            if (monacoEditor.getValue() !== activeTab.content) {
+              monacoEditor.setValue(activeTab.content);
+            }
+          }
+        }
+      } else {
+        noFileNotice.style.display = 'block';
+        editorContainer.style.display = 'none';
+        imageViewer.style.display = 'none';
+        if (viewerVideo) viewerVideo.pause();
+      }
+
+      updateRunButtonState();
+    }
+
+    function getLanguageByFileName(fileName) {
+      const ext = fileName.split('.').pop().toLowerCase();
+      switch (ext) {
+        case 'py': return 'python';
+        case 'js': return 'javascript';
+        case 'json': return 'json';
+        case 'html': return 'html';
+        case 'css': return 'css';
+        case 'md': return 'markdown';
+        default: return 'plaintext';
+      }
+    }
+
+    function updateRunButtonState() {
+      const runBtn = document.getElementById('run-btn');
+      const activeTab = openTabs.find(t => t.path === activeTabPath);
+
+      if (activeTab && activeTab.name.toLowerCase().endsWith('.py')) {
+        runBtn.className = 'activity-icon active-run';
+        runBtn.title = `▶ Python 스크립트 실행 (${activeTab.name})`;
+      } else {
+        runBtn.className = 'activity-icon disabled-run';
+        runBtn.title = '실행할 파이썬 파일(.py)을 열어주세요';
+      }
+    }
+
+    async function runActivePythonFile() {
+      const activeTab = openTabs.find(t => t.path === activeTabPath);
+      if (!activeTab || !activeTab.name.toLowerCase().endsWith('.py')) {
+        return;
+      }
+
+      if (activeTab.isModified) {
+        await saveCurrentFile();
+      }
+
+      toggleTerminalMenu(true);
+      const outputDiv = document.getElementById('terminal-output');
+
+      toggleVisionPanel(true);
+      const visionImg = document.getElementById('vision-result-img');
+      const visionVid = document.getElementById('vision-result-video');
+      const visionNoResult = document.getElementById('vision-no-result');
+      const visionStatusBar = document.getElementById('vision-status-bar');
+
+      if (visionVid) {
+        visionVid.style.display = 'none';
+        visionVid.pause();
+      }
+      if (visionNoResult) visionNoResult.style.display = 'none';
+      if (visionImg) visionImg.style.display = 'block';
+      if (visionStatusBar) visionStatusBar.textContent = `⚡ 비전 스트리밍 실시간 라이브 분석 중...`;
+
+      if (visionLiveInterval) clearInterval(visionLiveInterval);
+      visionLiveInterval = setInterval(() => {
+        if (currentProjectPath && visionImg) {
+          visionImg.src = 'file://' + currentProjectPath + '/preview.jpg?' + Date.now();
+        }
+      }, 80);
+
+      const res = await window.electronAPI.runPythonScript(activeTab.path);
+
+      if (visionLiveInterval) {
+        clearInterval(visionLiveInterval);
+        visionLiveInterval = null;
+      }
+
+      if (res.stdout) {
+        outputDiv.textContent += res.stdout;
+      }
+      if (res.stderr) {
+        outputDiv.textContent += (outputDiv.textContent && !outputDiv.textContent.endsWith('\n') ? '\n' : '') + res.stderr;
+      }
+      outputDiv.scrollTop = outputDiv.scrollHeight;
+
+      refreshProjectFiles();
+
+      if (currentProjectPath && visionImg && visionStatusBar) {
+        visionImg.src = 'file://' + currentProjectPath + '/preview.jpg?' + Date.now();
+        visionStatusBar.textContent = `✅ 비전 분석 실시간 완료: ${activeTab.name}`;
+      }
+    }
+
+    async function saveCurrentFile() {
+      const activeTab = openTabs.find(t => t.path === activeTabPath);
+      if (!activeTab || activeTab.isImage || activeTab.isVideo) return;
+
+      if (monacoEditor) {
+        const currentContent = monacoEditor.getValue();
+        const res = await window.electronAPI.writeFile(activeTab.path, currentContent);
+
+        if (res && res.success) {
+          activeTab.content = currentContent;
+          activeTab.isModified = false;
+          renderTabs();
+          console.log(`[파일 저장 완료] ${activeTab.path}`);
+        } else {
+          alert(`파일 저장 실패: ${res ? res.error : '알 수 없는 오류'}`);
+        }
+      }
+    }
+
+    function triggerEditorAction(actionId) {
+      if (!monacoEditor) return;
+      if (actionId === 'undo') monacoEditor.trigger('keyboard', 'undo', null);
+      if (actionId === 'redo') monacoEditor.trigger('keyboard', 'redo', null);
+      if (actionId === 'comment') monacoEditor.trigger('keyboard', 'editor.action.commentLine', null);
+    }
+
+    function toggleTerminalMenu(show) {
+      const panel = document.getElementById('terminal-panel');
+      if (show !== undefined) {
+        panel.style.display = show ? 'flex' : 'none';
+      } else {
+        panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+      }
+    }
+
+    function clearTerminalOutput() {
+      document.getElementById('terminal-output').textContent = '';
+    }
+
+    function toggleVisionPanel(show) {
+      const panel = document.getElementById('vision-result-panel');
+      const icon = document.getElementById('activity-vision-icon');
+      if (show !== undefined) {
+        panel.style.display = show ? 'flex' : 'none';
+      } else {
+        panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+      }
+
+      if (panel.style.display !== 'none') {
+        icon.classList.add('active');
+      } else {
+        icon.classList.remove('active');
+      }
+    }
+
+    function openNewProjectModal() {
+      document.getElementById('new-project-modal').style.display = 'flex';
+    }
+
+    function closeNewProjectModal() {
+      document.getElementById('new-project-modal').style.display = 'none';
+    }
+
+    async function confirmNewProject() {
+      const projName = document.getElementById('project-name-input').value.trim();
+      closeNewProjectModal();
+
+      if (!projName) return;
+
+      const res = await window.electronAPI.newProjectDialog();
+      if (res && res.success) {
+        currentProjectPath = res.path;
+        openTabs = [];
+        activeTabPath = null;
+        renderTabs();
+        renderActiveTabContent();
+        await refreshProjectFiles();
+        openFile(res.path + '/main.py', 'main.py');
+      }
+    }
+
+    const explorerPanel = document.getElementById('explorer-panel');
+    explorerPanel.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      showExplorerContextMenu(e.clientX, e.clientY);
+    });
+
+    document.addEventListener('click', () => {
+      hideExplorerContextMenu();
+      hideTabContextMenu();
+    });
+
+    function showExplorerContextMenu(x, y) {
+      const menu = document.getElementById('explorer-context-menu');
+      menu.style.left = `${x}px`;
+      menu.style.top = `${y}px`;
+      menu.style.display = 'block';
+    }
+
+    function hideExplorerContextMenu() {
+      document.getElementById('explorer-context-menu').style.display = 'none';
+    }
+
+    function createNewFileFromExplorer() {
+      hideExplorerContextMenu();
+      if (!currentProjectPath) {
+        alert('먼저 프로젝트를 열거나 생성해주세요.');
+        return;
+      }
+      const modal = document.getElementById('new-file-modal');
+      const input = document.getElementById('new-file-name-input');
+      if (input) input.value = 'sample.py';
+      if (modal) modal.style.display = 'flex';
+      setTimeout(() => {
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }, 50);
+    }
+
+    function closeNewFileModal() {
+      const modal = document.getElementById('new-file-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function confirmCreateNewFile() {
+      const input = document.getElementById('new-file-name-input');
+      const fileName = input ? input.value.trim() : '';
+      closeNewFileModal();
+
+      if (!fileName) return;
+
+      if (!currentProjectPath) {
+        alert('프로젝트 경로를 찾을 수 없습니다.');
+        return;
+      }
+
+      const newFilePath = currentProjectPath + '/' + fileName;
+
+      try {
+        const res = await window.electronAPI.writeFile(newFilePath, `print("Hello from ${fileName}\\n")\n`);
+        if (res && res.success) {
+          await refreshProjectFiles();
+          openFile(newFilePath, fileName);
+          console.log(`[새 파일 생성 성공] ${newFilePath}`);
+        } else {
+          alert(`새 파일 생성 실패: ${res ? res.error : '알 수 없는 오류'}`);
+        }
+      } catch (err) {
+        alert(`새 파일 생성 중 오류 발생: ${err.message}`);
+      }
+    }
+
+    function showTabContextMenu(x, y, filePath) {
+      contextTargetTabPath = filePath;
+      const menu = document.getElementById('tab-context-menu');
+      menu.style.left = `${x}px`;
+      menu.style.top = `${y}px`;
+      menu.style.display = 'block';
+    }
+
+    function hideTabContextMenu() {
+      document.getElementById('tab-context-menu').style.display = 'none';
+    }
+
+    async function handleTabContextMenu(action) {
+      hideTabContextMenu();
+      if (!contextTargetTabPath) return;
+
+      if (action === 'copy-path') {
+        await navigator.clipboard.writeText(contextTargetTabPath);
+      } else if (action === 'copy-relative-path') {
+        let relPath = contextTargetTabPath;
+        if (currentProjectPath && contextTargetTabPath.startsWith(currentProjectPath)) {
+          relPath = contextTargetTabPath.replace(currentProjectPath, '').replace(/^\//, '');
+        }
+        await navigator.clipboard.writeText(relPath);
+      } else if (action === 'close') {
+        closeTab(contextTargetTabPath);
+      } else if (action === 'close-others') {
+        openTabs = openTabs.filter(t => t.path === contextTargetTabPath);
+        activeTabPath = contextTargetTabPath;
+        renderTabs();
+        renderActiveTabContent();
+      } else if (action === 'close-all') {
+        openTabs = [];
+        activeTabPath = null;
+        renderTabs();
+        renderActiveTabContent();
+      }
     }
   </script>
-  </body>
+</body>
+
 </html>
