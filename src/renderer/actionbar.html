@@ -1,0 +1,19 @@
+<div class="actionbar">
+  <div class="actionbar-icon" title="프로젝트" onclick="toggleProjectPanel()">🗂️</div>
+  <div id="run-btn" class="actionbar-icon disabled-run" onclick="runActivePythonFile()" title="실행">&#9654;</div>
+
+  <div class="activity-source-group" style="position: relative;">
+    <div id="activity-source-toggle" class="actionbar-icon"
+      onclick="event.stopPropagation(); toggleVisionSourceMenu()" title="비디오 입력 선택">
+      <img id="source-toggle-img" src="asset/icon-camera.svg" style="width: 24px; height: 24px; object-fit: contain;" />
+    </div>
+    <div id="source-sub-menu" class="source-sub-menu"
+      style="display: none; position: absolute; left: 52px; top: 0; background: #252526; border: 1px solid #454545; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 2000; padding: 4px; min-width: 200px;">
+      <div id="camera-list-container"></div>
+    </div>
+  </div>
+
+  <div id="activity-vision-icon" class="actionbar-icon" onclick="toggleVisionPanel()" title="비전 분석 라이브 패널 토글">👁️</div>
+  <div class="actionbar-icon" title="검색">&#128080;</div>
+  <div class="actionbar-icon" style="margin-top: auto;" title="설정">&#9881;</div>
+</div>

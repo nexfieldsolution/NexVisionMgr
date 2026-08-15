@@ -1,0 +1,51 @@
+<!-- 새 프로젝트 생성 모달 -->
+<div id="new-project-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <h3 style="font-size: 14px; font-weight: 600; color: #ffffff; margin-bottom: 8px;">✨ 새 프로젝트 생성</h3>
+    <p style="margin-bottom: 12px; font-size: 12px; color: #aaaaaa;">생성할 프로젝트 폴더 이름을 입력하세요:</p>
+    <input type="text" id="project-name-input" value="VisionProject1"
+      style="width: 100%; padding: 8px; font-size: 13px; background: #1e1e1e; color: #ffffff; border: 1px solid #454545; border-radius: 4px; margin-bottom: 16px; outline: none;">
+    <div style="display: flex; justify-content: flex-end; gap: 8px;">
+      <button onclick="closeNewProjectModal()"
+        style="padding: 6px 14px; font-size: 12px; background: #3c3c3c; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">취소</button>
+      <button onclick="confirmNewProject()"
+        style="padding: 6px 14px; font-size: 12px; background: #007acc; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">위치 선택 및 생성</button>
+    </div>
+  </div>
+</div>
+
+<!-- 새 파일 생성 모달 -->
+<div id="new-file-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <h3 style="font-size: 14px; font-weight: 600; color: #ffffff; margin-bottom: 8px;">📄 새 파일 생성</h3>
+    <p style="margin-bottom: 12px; font-size: 12px; color: #aaaaaa;">생성할 파일 이름을 입력하세요:</p>
+    <input type="text" id="new-file-name-input" value="sample.py"
+      onkeydown="if(event.key==='Enter') confirmCreateNewFile()"
+      style="width: 100%; padding: 8px; font-size: 13px; background: #1e1e1e; color: #ffffff; border: 1px solid #007acc; border-radius: 4px; margin-bottom: 16px; outline: none; box-sizing: border-box;">
+    <div style="display: flex; justify-content: flex-end; gap: 8px;">
+      <button onclick="closeNewFileModal()"
+        style="padding: 6px 14px; font-size: 12px; background: #3c3c3c; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">취소</button>
+      <button onclick="confirmCreateNewFile()"
+        style="padding: 6px 14px; font-size: 12px; background: #007acc; color: #ffffff; border: none; border-radius: 3px; cursor: pointer;">생성</button>
+    </div>
+  </div>
+</div>
+
+<!-- 파일 이름 변경 모달 -->
+<div id="rename-file-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <div style="font-size: 14px; font-weight: bold; margin-bottom: 12px; color: #ffffff; display: flex; align-items: center; gap: 6px;">
+      <span>✏️ 파일 이름 변경</span>
+    </div>
+    <div style="font-size: 12px; color: #888888; margin-bottom: 8px;">변경할 새로운 파일명을 입력하세요:</div>
+    <input type="text" id="rename-file-input"
+      style="width: 100%; padding: 8px; font-size: 13px; background: #1e1e1e; color: #ffffff; border: 1px solid #007acc; border-radius: 4px; outline: none; margin-bottom: 16px;"
+      onkeydown="if(event.key==='Enter') confirmRenameFile(); if(event.key==='Escape') closeRenameModal();" />
+    <div style="display: flex; justify-content: flex-end; gap: 8px;">
+      <button onclick="closeRenameModal()"
+        style="padding: 6px 14px; font-size: 12px; background: #3c3c3c; color: #ffffff; border: none; border-radius: 4px; cursor: pointer;">취소</button>
+      <button onclick="confirmRenameFile()"
+        style="padding: 6px 14px; font-size: 12px; background: #007acc; color: #ffffff; border: none; border-radius: 4px; cursor: pointer;">변경</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,74 @@
+
+
+
+git push nexfield main:douglas
+
+GIT_LFS_SKIP_PUSH=1 git push nexfield main:douglas
+
+*****************************************************************************************************
+
+
+
+
+-------------------------------------------------------------------
+2026.08.14 NexVisionMgr 
+1. 소스프로젝트 정리 - 폴더구조 
+    NexVisionMgr/src
+        asset/  
+        bridge/  
+        main/   
+        renderer/
+
+
+-------------------------------------------------------------------
+2026.08.06 지난작업 복습 
+
+[지난작업] 
+   1. NexVisionMgr 만들기 
+   - 소스프로젝트 만들기 
+      npx create-electron-app@latest NexVisionMgr
+
+   - 실행 
+      source ~/.nvm/nvm.sh && nvm use 24 && npm start     
+   - 실행 파일만들기 
+      npm run package
+
+   2. NexVisionMgr 기능추가
+   - 기본 타이틀바를 숨기고
+   - HTML/CSS로 그립 영역(-webkit-app-region: drag)과 닫기/최소화/최대화 버튼을 만든 뒤
+   - IPC 통신(ipcRenderer.send ↔ ipcMain.on('window-minimize'), 'window-maximize', 'window-close')을 통해 창 제어 기능까지 완성 
+
+
+
+
+-------------------------------------------------------------------
+2026.08.07 NexVisionMgr IDE 기능 확장 및 비전 라이브 스트리밍 통합
+
+[금일작업]
+1. 에디터 UI/UX 및 Monaco Editor 고도화
+   (1) VS Code 스타일 커스텀 타이틀바 메뉴 & Activity Bar
+       - File: 📄 새 파일, 📂 프로젝트 열기, 💾 파일 저장, 🚪 종료
+       - Edit: ↩ 실행 취소(Undo), ↪ 다시 실행(Redo), Cut/Copy/Paste
+       - View: 💻 콘솔 터미널 토글, 👁️ Vision Side Panel 토글
+       - Run: ▶ Python 스크립트 실행 (OpenCV 미디어 처리)
+   (2) Monaco Editor 로컬 연동 (중앙 에디터 영역)
+       - Monaco Editor 로컬 node_modules 모듈 결합 (CDN 미사용)
+       - 파이썬 구문 하이라이팅, 줄 번호, 미니맵, 다크 테마(vs-dark)
+       - Tab / Shift+Tab 들여쓰기/내어쓰기, Ctrl+/ 주석 토글 연동
+   (3) 탐색기(Explorer) 우클릭 컨텍스트 메뉴 & 새 파일 커스텀 모달
+       - 탐색기 영역 우클릭 시 `📄 새 파일...` 팝업 메뉴 제공
+       - `sample.py` 기본 파일명 제시 커스텀 모달 입력창 생성 및 실제 파일 생성/자동 탭 오픈
+
+2. 파이썬 실행기 및 미디어 뷰어 연동
+   (1) Node.js child_process.spawn 비동기 실행 파이프라인
+       - 파이썬 스크립트 실행 시 stdout/stderr 실시간 캡처 및 하단 터미널 콘솔 렌더링
+   (2) 이미지 & 동영상 미디어 뷰어 내장
+       - 이미지(JPG, PNG, BMP) 뷰어 및 MP4/MPEG 동영상 플레이어(Autoplay & Loop) 내장
+
+3. 우측 비전 분석 라이브 결과 도킹 패널 (Vision Side Panel)
+   (1) 화면 최우측 도킹 레이아웃
+       - 중앙 에디터 영역과 독립된 최우측 비전 라이브 분석 결과 도킹 패널 배치
+   (2) 실시간 비전 프레임 라이브 스트리밍 (Real-time Vision Live Streaming)
+       - 파이썬 스크립트 실행 시 OpenCV 처리 프레임을 80ms 타임슬롯 스트리밍으로 우측 라이브 패널에 실시간 렌더링
+
+

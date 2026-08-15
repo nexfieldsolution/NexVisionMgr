@@ -1,0 +1,24 @@
+<!-- 탐색기 우클릭 컨텍스트 메뉴 -->
+<div id="explorer-context-menu" class="context-menu">
+  <div class="menu-option" onclick="createNewFileFromExplorer()">📄 새 파일...</div>
+  <div class="menu-separator"></div>
+  <div id="menu-opt-rename" class="menu-option" onclick="openRenameModal()">✏️ 파일 이름 변경... <span style="font-size: 10px; color: #888; margin-left: 8px;">F2</span></div>
+  <div id="menu-opt-copy" class="menu-option" onclick="copySelectedFile()">📋 파일 복사 <span style="font-size: 10px; color: #888; margin-left: 8px;">Ctrl+C</span></div>
+  <div id="menu-opt-paste" class="menu-option" onclick="pasteCopiedFile()">📋 파일 붙여넣기 <span style="font-size: 10px; color: #888; margin-left: 8px;">Ctrl+V</span></div>
+  <div id="menu-opt-delete" class="menu-option" onclick="deleteSelectedFile()" style="color: #ff4d4f;">🗑️ 파일 삭제</div>
+  <div id="menu-sep-paths" class="menu-separator"></div>
+  <div id="menu-opt-copy-fullpath" class="menu-option" onclick="copyFileFullPath()">🔗 전체 경로 복사</div>
+  <div id="menu-opt-copy-relpath" class="menu-option" onclick="copyFileRelativePath()">🔗 상대 경로 복사</div>
+  <div class="menu-separator"></div>
+  <div class="menu-option" onclick="refreshProjectFiles()">🔄 새로고침</div>
+</div>
+
+<!-- 탭 우클릭 컨텍스트 메뉴 -->
+<div id="tab-context-menu" class="context-menu">
+  <div class="menu-option" onclick="handleTabContextMenu('copy-path')">📋 전체 경로 복사</div>
+  <div class="menu-option" onclick="handleTabContextMenu('copy-relative-path')">📄 상대 경로 복사</div>
+  <div class="menu-separator"></div>
+  <div class="menu-option" onclick="handleTabContextMenu('close')">✕ 탭 닫기</div>
+  <div class="menu-option" onclick="handleTabContextMenu('close-others')">✕ 다른 탭 닫기</div>
+  <div class="menu-option" onclick="handleTabContextMenu('close-all')">✕ 모든 탭 닫기</div>
+</div>

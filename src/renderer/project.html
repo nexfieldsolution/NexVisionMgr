@@ -1,0 +1,16 @@
+<div id="project-panel" class="project-panel" style="position: relative;">
+  <div class="resize-handle-ew" style="left: auto; right: 0;" onmousedown="startProjectPanelResize(event)"></div>
+  <div class="project-title">
+    <span>프로젝트</span>
+    <span onclick="toggleProjectPanel(false)" title="닫기" style="cursor: pointer; color: #888; font-size: 12px;"
+      onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">✕</span>
+      
+  </div>
+  <div class="project-folder-header">
+    <span class="folder-icon">&#128193;</span>
+    <span id="current-folder-name" class="folder-name">MyVisionProject</span>
+  </div>
+  <div class="project-content">
+    <ul id="file-list-tree" class="file-tree"></ul>
+  </div>
+</div>

@@ -1,0 +1,10 @@
+<div id="bash-pane" style="flex: 1; flex-direction: column; overflow: hidden; display: none;">
+  <div id="bash-output" class="terminal-output" style="color: #cccccc;"></div>
+  <div style="display: flex; align-items: center; background: #1e1e1e; border-top: 1px solid #333333; padding: 4px 10px; gap: 6px; flex-shrink: 0;">
+    <span style="color: #4ec9b0; font-family: 'Consolas', monospace; font-size: 12px;">$</span>
+    <input id="bash-input" type="text"
+      style="flex: 1; background: transparent; border: none; outline: none; color: #cccccc; font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; user-select: text; cursor: text;"
+      placeholder="bash 명령어 입력 후 Enter..."
+      onkeydown="if(event.key==='Enter') execBashCommand()" />
+  </div>
+</div>

@@ -1,0 +1,55 @@
+<div class="titlebar">
+  <div class="titlebar-drag-region">
+    <img src="asset/logo.png" class="app-icon" alt="NexVisionMgr Logo">
+    <div class="menubar">
+      <div class="menu-item">
+        파일
+        <div class="dropdown-content">
+          <div class="menu-option" onclick="openNewProjectModal()">✨ 새 프로젝트...</div>
+          <div class="menu-option" onclick="createNewFileFromExplorer()">📄 새 파일...</div>
+          <div class="menu-separator"></div>
+          <div class="menu-option" onclick="openProject()">📂 프로젝트 폴더 열기...</div>
+          <div class="menu-option has-submenu">
+            🕐 최근 항목 열기
+            <span class="submenu-arrow">&#9658;</span>
+            <div class="submenu">
+              <div id="recent-projects-list"></div>
+              <div id="recent-footer-sep" class="menu-separator"></div>
+              <div id="recent-clear-btn" class="menu-option" onclick="clearRecentProjects()">🗑 최근 항목 지우기</div>
+            </div>
+          </div>
+          <div class="menu-option" onclick="saveCurrentFile()">💾 파일 저장 <span class="shortcut">Ctrl+S</span></div>
+          <div class="menu-separator"></div>
+          <div class="menu-option" onclick="window.electronAPI.closeWindow()">🚪 종료</div>
+        </div>
+      </div>
+      <div class="menu-item">
+        편진
+        <div class="dropdown-content">
+          <div class="menu-option" onclick="triggerEditorAction('undo')">↩ 실행 취소 <span class="shortcut">Ctrl+Z</span></div>
+          <div class="menu-option" onclick="triggerEditorAction('redo')">↪ 다시 실행 <span class="shortcut">Ctrl+Y</span></div>
+          <div class="menu-separator"></div>
+          <div class="menu-option" onclick="triggerEditorAction('comment')">💬 주석 토글 <span class="shortcut">Ctrl+/</span></div>
+        </div>
+      </div>
+      <div class="menu-item">
+        보기
+        <div class="dropdown-content">
+          <div class="menu-option" onclick="toggleTerminalMenu()">💻 콘솔 터미널 <span class="shortcut">Ctrl+`</span></div>
+          <div class="menu-option" onclick="toggleVisionPanel()">👁️ 비전 분석 패널</div>
+        </div>
+      </div>
+      <div class="menu-item">
+        보기
+        <div class="dropdown-content">
+          <div class="menu-option" onclick="runActivePythonFile()">▶ Python 스크립트 실행 <span class="shortcut">F5</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="window-controls">
+    <div class="control-btn minimize-btn" onclick="window.electronAPI.minimizeWindow()" title="최소화">&#8211;</div>
+    <div class="control-btn maximize-btn" onclick="window.electronAPI.maximizeWindow()" title="최대화">&#9633;</div>
+    <div class="control-btn close-btn" onclick="window.electronAPI.closeWindow()" title="닫기">&#10005;</div>
+  </div>
+</div>
