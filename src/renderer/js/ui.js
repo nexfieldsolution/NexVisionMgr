@@ -42,6 +42,9 @@ function toggleTerminalMenu(show) {
   } else {
     panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
   }
+  if (panel.style.display !== 'none' && terminals.length === 0) {
+    addTerminalTab();
+  }
 }
 
 function clearTerminalOutput() {
@@ -142,9 +145,17 @@ window.addEventListener('DOMContentLoaded', async () => {
   // fragment 로드 완료 후 Monaco 초기화 및 패널 초기화
   initMonaco();
   initPanels();
+  toggleTerminalMenu(false);
 
   refreshProjectFiles();
   populateRecentProjects();
+
+  window.electronAPI.onWindowState((isMaximized) => {
+    const btn = document.getElementById('maximize-btn')
+    if (!btn) return
+    btn.textContent = isMaximized ? '⧉' : '□'
+    btn.title = isMaximized ? '복원' : '최대화'
+  })
 
   document.getElementById('project-panel').addEventListener('contextmenu', (e) => {
     e.preventDefault();

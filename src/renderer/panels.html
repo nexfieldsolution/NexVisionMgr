@@ -2,7 +2,10 @@
   <div class="resize-handle-ns" onmousedown="startPanelResize(event)"></div>
   <div class="terminal-header">
     <div id="panel-tabs" style="display: flex; align-items: center; height: 100%;">
-      <div id="tab-btn-console" class="panel-tab panel-tab-active" onclick="switchPanel('console')">💻 콘솔</div>
+      <div id="tab-btn-console" class="panel-tab panel-tab-active" onclick="switchPanel('console')">
+        <span>💻 콘솔</span>
+        <span class="tab-close-btn" onclick="event.stopPropagation(); closeConsoleTab()" title="닫기">✕</span>
+      </div>
     </div>
     <div style="display: flex; align-items: center; gap: 2px; padding-right: 6px;">
       <span class="terminal-action-btn" onclick="addTerminalTab()" title="새 터미널 추가">＋</span>
@@ -11,5 +14,5 @@
     </div>
   </div>
   <div id="slot-console"   style="display:contents"></div>
-  <div id="panels-content" style="display:contents"></div>
+  <div id="panels-content" style="flex:1; min-height:0; display:none; flex-direction:column;"></div>
 </div>

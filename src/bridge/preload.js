@@ -32,5 +32,10 @@ module.exports = {
   watchProjectDir:     (dirPath) => ipcRenderer.invoke('watch-project-dir', dirPath),
   onProjectDirChanged: (cb) => ipcRenderer.on('project-dir-changed', cb),
 
-  runBashCommand: (command, cwd) => ipcRenderer.invoke('run-bash-command', { command, cwd }),
+  ptyCreate: (cwd)              => ipcRenderer.invoke('pty-create', { cwd }),
+  ptyWrite:  (id, data)        => ipcRenderer.send('pty-write',  { id, data }),
+  ptyResize: (id, cols, rows)  => ipcRenderer.send('pty-resize', { id, cols, rows }),
+  ptyKill:   (id)              => ipcRenderer.send('pty-kill',   { id }),
+  onPtyData: (cb) => ipcRenderer.on('pty-data', (_, p) => cb(p)),
+  onPtyExit: (cb) => ipcRenderer.on('pty-exit', (_, p) => cb(p)),
 };
